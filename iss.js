@@ -71,12 +71,12 @@ const fetchCoordsByIP = function(ip, callback) {
  *   - The fly over times as an array of objects (null if error). Example:
  *     [ { risetime: 134564234, duration: 600 }, ... ]
  */
- const fetchISSFlyOverTimes = function(coords, callback) {
+const fetchISSFlyOverTimes = function(coords, callback) {
   // https://iss-pass.herokuapp.com/json/?lat=43.8864&lon=-78.9742
   const url = `https://iss-pass.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`;
   request(url, (error, response, body) => {
-     // error can be set if invalid domain, user is offline, etc.
-     if (error) {
+    // error can be set if invalid domain, user is offline, etc.
+    if (error) {
       callback(error, null);
       return;
     }
@@ -95,45 +95,45 @@ const fetchCoordsByIP = function(ip, callback) {
     } else {
       callback(null, responseArr);
     }
-  })
+  });
 
 };
 
 
 
-// iss.js 
+// iss.js
 
 /**
  * Orchestrates multiple API requests in order to determine the next 5 upcoming ISS fly overs for the user's current location.
  * Input:
- *   - A callback with an error or results. 
+ *   - A callback with an error or results.
  * Returns (via Callback):
  *   - An error, if any (nullable)
  *   - The fly-over times as an array (null if error):
  *     [ { risetime: <number>, duration: <number> }, ... ]
- */ 
+ */
 
-  const nextISSTimesForMyLocation = function(callback) {
-    fetchMyIP((error, ip) => {
+const nextISSTimesForMyLocation = function(callback) {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null);
+    }
+  
+    fetchCoordsByIP(ip, (error, loc) => {
       if (error) {
         return callback(error, null);
       }
   
-      fetchCoordsByIP(ip, (error, loc) => {
+      fetchISSFlyOverTimes(loc, (error, nextPasses) => {
         if (error) {
           return callback(error, null);
         }
   
-        fetchISSFlyOverTimes(loc, (error, nextPasses) => {
-          if (error) {
-            return callback(error, null);
-          }
-  
-          callback(null, nextPasses);
-        });
+        callback(null, nextPasses);
       });
     });
-  };
+  });
+};
 
 
 
